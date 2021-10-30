@@ -17,6 +17,11 @@ import java.util.Optional;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SessionUtils {
 
+    /**
+     * 从session中获取token
+     * @param request
+     * @return
+     */
     public static SessionAccessToken getAccessToken(HttpServletRequest request) {
         return (SessionAccessToken) request.getSession().getAttribute(SsoConstant.SESSION_ACCESS_TOKEN);
     }
@@ -29,6 +34,11 @@ public class SessionUtils {
         return Optional.ofNullable(getUser(request)).map(SsoUser::getId).orElse(null);
     }
 
+    /**
+     * 将从认证中心获取的token放入到session
+     * @param request
+     * @param rpcAccessToken
+     */
     public static void setAccessToken(HttpServletRequest request, RpcAccessToken rpcAccessToken) {
         SessionAccessToken sessionAccessToken = null;
         if (rpcAccessToken != null) {
@@ -43,6 +53,10 @@ public class SessionUtils {
                 rpcAccessToken.getRefreshToken(), rpcAccessToken.getUser(), expirationTime);
     }
 
+    /**
+     * 销毁session
+     * @param request
+     */
     public static void invalidate(HttpServletRequest request) {
         setAccessToken(request, null);
         request.getSession().invalidate();
