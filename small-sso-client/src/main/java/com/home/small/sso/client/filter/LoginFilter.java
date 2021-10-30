@@ -69,7 +69,7 @@ public class LoginFilter extends ClientFilter {
      * @param request
      * @return
      */
-    private boolean refreshToken(String refreshToken, HttpServletRequest request) {
+    protected boolean refreshToken(String refreshToken, HttpServletRequest request) {
         // 去认证中心刷新token
         Result<RpcAccessToken> result = Oauth2Utils.refreshToken(getServerUrl(), getAppId(), refreshToken);
         if (!result.isSuccess()) {
@@ -155,7 +155,7 @@ public class LoginFilter extends ClientFilter {
         }
     }
 
-    private void responseJson(HttpServletResponse response, int code, String msg) throws IOException {
+    protected void responseJson(HttpServletResponse response, int code, String msg) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(200);
         PrintWriter writer = response.getWriter();
