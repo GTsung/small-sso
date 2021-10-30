@@ -55,7 +55,7 @@ public class LoginFilter extends ClientFilter {
     private void getAccessToken(String code, HttpServletRequest request) {
         Result<RpcAccessToken> result = Oauth2Utils.getAccessToken(getServerUrl(), getAppId(), getAppSecret(), code);
         if (!result.isSuccess()) {
-            log.error("getAccessToken has error, message:{}", result.getMessage());
+            log.info("getAccessToken has error, message:{}", result.getMessage());
             return;
         }
         // 放入到session中并绑定映射关系
