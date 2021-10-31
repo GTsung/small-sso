@@ -2,7 +2,11 @@ package com.home.small.sso.server.controller;
 
 import com.home.small.sso.client.constants.Oauth2Constant;
 import com.home.small.sso.client.constants.SsoConstant;
+import com.home.small.sso.client.rpc.Result;
+import com.home.small.sso.client.rpc.SsoUser;
 import com.home.small.sso.server.constant.AppConstant;
+import com.home.small.sso.server.service.AppService;
+import com.home.small.sso.server.service.UserService;
 import com.home.small.sso.server.session.CodeManager;
 import com.home.small.sso.server.session.SessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -24,15 +29,21 @@ import java.net.URLDecoder;
 @RequestMapping("/login")
 public class LoginController {
 
-
     @Autowired
     private SessionManager sessionManager;
 
     @Autowired
     private CodeManager codeManager;
 
+    @Autowired
+    private AppService appService;
+
+    @Autowired
+    private UserService userService;
+
     /**
      * 跳转到登录页或者生成授权码重定向
+     *
      * @param redirectUri
      * @param appId
      * @param request
@@ -50,6 +61,40 @@ public class LoginController {
             return goLoginPath(redirectUri, appId, request);
         }
         // 生成授权码并重定向
+        return generateCodeAndRedirect(redirectUri, tgt);
+    }
+
+    /**
+     * 登录网页提交登陆操作
+     * @param redirectUri
+     * @param appId
+     * @param username
+     * @param password
+     * @param request
+     * @param response
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    @RequestMapping(method = RequestMethod.POST)
+    public String login(
+            @RequestParam(value = SsoConstant.REDIRECT_URI) String redirectUri,
+            @RequestParam(value = Oauth2Constant.APP_ID) String appId,
+            @RequestParam String username,
+            @RequestParam String password,
+            HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+
+        if (!appService.exists(appId)) {
+            request.setAttribute("errorMessage", "非法应用");
+            return goLoginPath(redirectUri, appId, request);
+        }
+
+        Result<SsoUser> result = userService.login(username, password);
+        if (!result.isSuccess()) {
+            request.setAttribute("errorMessage", result.getMessage());
+            return goLoginPath(redirectUri, appId, request);
+        }
+        // 生成TGT或者延长TGT的时效或者更新缓存中TGT对应的用户信息
+        String tgt = sessionManager.setUser(result.getData(), request, response);
         return generateCodeAndRedirect(redirectUri, tgt);
     }
 
@@ -76,7 +121,7 @@ public class LoginController {
      * @return
      */
     private String generateCodeAndRedirect(String redirectUri, String tgt) throws UnsupportedEncodingException {
-        // 生成授权码
+        // 生成授权码，缓存code与TGT的对应关系
         String code = codeManager.generate(tgt, true, redirectUri);
         // 带着code授权码重定向到客户端
         return "redirect:" + authRedirectUri(redirectUri, code);
@@ -84,6 +129,7 @@ public class LoginController {
 
     /**
      * 为重定向页面url添加code授权码参数
+     *
      * @param redirectUri
      * @param code
      * @return
