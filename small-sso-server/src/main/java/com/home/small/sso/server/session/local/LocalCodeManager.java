@@ -4,6 +4,7 @@ import com.home.small.sso.server.common.CodeContent;
 import com.home.small.sso.server.common.ExpirationPolicy;
 import com.home.small.sso.server.session.CodeManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "sso.session.manager", havingValue = "local")
 public class LocalCodeManager implements CodeManager, ExpirationPolicy {
 
     private Map<String, DummyCode> codeMap = new ConcurrentHashMap<>();

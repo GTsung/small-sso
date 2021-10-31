@@ -5,6 +5,7 @@ import com.home.small.sso.server.common.RefreshTokenContent;
 import com.home.small.sso.server.session.RefreshTokenManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "sso.session.manager", havingValue = "local")
 public class LocalRefreshTokenManager implements RefreshTokenManager, ExpirationPolicy {
 
     @Value("${sso.timeout}")
