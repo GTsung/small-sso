@@ -131,7 +131,7 @@ public class LoginFilter extends ClientFilter {
      * @return
      */
     private String getCurrentUrl(HttpServletRequest request) {
-        return new StringBuilder().append(request.getRequestURI())
+        return new StringBuilder().append(request.getRequestURL())
                 .append(request.getQueryString() == null ? "" : "?" + request.getQueryString()).toString();
     }
 
