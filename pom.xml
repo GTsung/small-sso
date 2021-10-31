@@ -10,6 +10,7 @@
     <modules>
         <module>small-sso-client</module>
         <module>small-sso-server</module>
+        <module>small-sso-demo</module>
     </modules>
     <packaging>pom</packaging>
 
