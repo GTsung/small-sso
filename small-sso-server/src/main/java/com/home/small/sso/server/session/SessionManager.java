@@ -20,6 +20,9 @@ public class SessionManager {
     @Autowired
     private TicketGrantingTicketManager ticketGrantingTicketManager;
 
+    @Autowired
+    private AccessTokenManager accessTokenManager;
+
     /**
      * 获取ticketGrantTicket
      *
@@ -61,5 +64,23 @@ public class SessionManager {
             ticketGrantingTicketManager.setUser(tgt, user);
         }
         return tgt;
+    }
+
+    /**
+     * 销毁session
+     * @param request
+     * @param response
+     */
+    public void invalidate(HttpServletRequest request, HttpServletResponse response) {
+        String tgt = getCookieTgt(request);
+        if (StringUtils.isEmpty(tgt)) {
+            return;
+        }
+        // 删除登陆凭证TGT
+        ticketGrantingTicketManager.removeTgt(tgt);
+        // 删除cookie
+        CookieUtils.removeCookie(AppConstant.TGT, "/", response);
+        // 删除TGT对应的所有凭证
+        accessTokenManager.removeByTgt(tgt);
     }
 }
