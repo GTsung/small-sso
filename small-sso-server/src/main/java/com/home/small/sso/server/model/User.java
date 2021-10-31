@@ -24,12 +24,12 @@ public class User implements Serializable {
     private Integer id;
 
     /**
-     * 姓名
+     * 姓名(昵称)
      */
     private String name;
 
     /**
-     * 用户名
+     * 用户名(登录名)
      */
     private String username;
     /**
